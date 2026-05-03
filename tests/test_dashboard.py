@@ -59,7 +59,7 @@ class TestFCIComputation:
     @patch.object(FleetDashboard, 'get_meta_score')
     def test_fci_default_baseline(self, mock_meta, mock_learn, mock_att, mock_phi):
         """Defaults: phi=0.3, att=0.2, learn=0.5, meta=0.0
-        FCI = 0.4*0.3 + 0.2*0.2 + 0.25*0.5 + 0.15*0.0 = 0.12+0.04+0.125+0 = 0.31"""
+        FCI = 0.4*0.3 + 0.2*0.2 + 0.25*0.5 + 0.15*0.0 = 0.12+0.04+0.125+0 = 0.285"""
         mock_phi.return_value = 0.3
         mock_att.return_value = 0.2
         mock_learn.return_value = 0.5
@@ -67,7 +67,7 @@ class TestFCIComputation:
 
         dashboard = FleetDashboard()
         fci = dashboard.compute_fci()
-        assert abs(fci - 0.310) < 0.01
+        assert abs(fci - 0.285) < 0.01
 
 
 class TestConsciousnessLevels:
