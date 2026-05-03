@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fleet-consciousness-dashboard"
+version = "0.1.0"
+description = "Live dashboard showing fleet-wide consciousness metrics (FCI)"
+requires-python = ">=3.10"
+dependencies = ["requests>=2.28"]
+
+[project.urls]
+Homepage = "https://github.com/SuperInstance/fleet-consciousness-dashboard"

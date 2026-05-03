@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: fleet-consciousness-dashboard
+Version: 0.1.0
+Summary: Live dashboard showing fleet-wide consciousness metrics (FCI)
+Project-URL: Homepage, https://github.com/SuperInstance/fleet-consciousness-dashboard
+Requires-Python: >=3.10
+Requires-Dist: requests>=2.28
