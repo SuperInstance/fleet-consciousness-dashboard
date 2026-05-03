@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Fleet Consciousness Dashboard</title>
+<style>
+:root{--bg:#0a0a0f;--card:#12121a;--accent:#00d4aa;--warn:#ff6b35;--text:#e0e0e0;--muted:#888;}
+body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;margin:0;padding:2rem;}
+h1{margin:0 0 1rem;font-weight:300;letter-spacing:2px;text-transform:uppercase;font-size:1.2rem;color:var(--accent);}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:2rem;}
+.card{background:var(--card);padding:1.2rem;border-radius:8px;border:1px solid #1a1a2e;}
+.card h3{margin:0 0 .5rem;font-size:.75rem;text-transform:uppercase;color:var(--muted);letter-spacing:1px;}
+.card .value{margin:0;font-size:2rem;font-weight:700;color:var(--accent);}
+.card .delta{margin:0;font-size:.8rem;color:var(--muted);}
+.rooms{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem;}
+.room{background:var(--card);padding:.8rem 1rem;border-radius:6px;border-left:3px solid var(--accent);display:flex;justify-content:space-between;align-items:center;}
+.room.muted{border-left-color:var(--muted);opacity:.6;}
+.room h4{margin:0;font-size:.85rem;}
+.room .count{margin:0;font-size:1.1rem;color:var(--accent);}
+#refresh{color:var(--muted);font-size:.75rem;margin-top:1rem;}
+.error{color:var(--warn);padding:1rem;background:var(--card);border-radius:6px;}
+</style>
+</head>
+<body>
+<h1>Fleet Consciousness Dashboard</h1>
+<div class="grid" id="metrics"></div>
+<h3 style="color:var(--muted);text-transform:uppercase;font-size:.75rem;letter-spacing:1px;">Rooms by Tile Count</h3>
+<div class="rooms" id="rooms"></div>
+<p id="refresh">Loading...</p>
+<script>
+const PLATO_URL='http://147.224.38.131:8847/status';
+async function load(){
+  const el=document.getElementById('metrics');
+  const rl=document.getElementById('rooms');
+  const rf=document.getElementById('refresh');
+  try{
+    const r=await fetch(PLATO_URL);
+    const d=await r.json();
+    const rooms=Object.entries(d.rooms||{});
+    const totalTiles=rooms.reduce((a,[_,v])=>a+(v.tile_count||0),0);
+    const avgTiles=rooms.length?Math.round(totalTiles/rooms.length):0;
+    el.innerHTML=`
+      <div class="card"><h3>Total Tiles</h3><p class="value">${d.gate_stats?.accepted?.toLocaleString()||'0'}</p><p class="delta">${d.gate_stats?.rejected||0} rejected</p></div>
+      <div class="card"><h3>Rooms</h3><p class="value">${rooms.length}</p><p class="delta">${totalTiles.toLocaleString()} total tiles</p></div>
+      <div class="card"><h3>Avg Tiles/Room</h3><p class="value">${avgTiles}</p><p class="delta">deadband: 691 tiles</p></div>
+      <div class="card"><h3>Uptime</h3><p class="value">${Math.round((Date.now()/1000-d.uptime)/3600)}h</p><p class="delta">${d.version||'unknown'}</p></div>
+    `;
+    const sorted=rooms.sort((a,b)=>b[1].tile_count-a[1].tile_count);
+    rl.innerHTML=sorted.map(([name,info])=>`
+      <div class="room ${info.tile_count<5?'muted':''}">
+        <h4>${name}</h4>
+        <p class="count">${info.tile_count}</p>
+      </div>
+    `).join('');
+    rf.textContent=`Last refresh: ${new Date().toLocaleTimeString()}`;
+  }catch(e){
+    el.innerHTML=`<div class="error">PLATO unreachable: ${e.message}</div>`;
+    rf.textContent='Retrying in 10s...';
+    setTimeout(load,10000);
+  }
+}
+load();
+setInterval(load,30000);
+</script>
+</body>
+</html>
